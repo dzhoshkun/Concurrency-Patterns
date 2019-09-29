@@ -21,9 +21,10 @@ class Philosopher:
         call_stats = '%d, %d, %d\n' % (self._identifier, num_thoughts, num_meals)
         report_call_stats(call_stats)
 
-    # do something useful in the following two functions
     def think(self):
+        """Override this in sub-classes to do something more useful."""
         pass
 
     def eat(self):
+        """Override this in sub-classes to do something more useful."""
         pass
