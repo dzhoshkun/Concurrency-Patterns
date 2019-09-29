@@ -32,34 +32,6 @@ else:
 call_statistics_filename += human_readable_timestamp() + '.csv'
 
 
-def dining_philosopher(i):
-    started_at_sec = time()
-    num_thoughts = 0
-    num_meals = 0
-    while time() - started_at_sec < lifetime_in_sec:
-        think()
-        num_thoughts += 1
-        get_forks(i)
-        eat()
-        num_meals += 1
-        put_forks(i)
-    call_statistics = '%d, %d, %d' % (i, num_thoughts, num_meals)
-    if use_processes:
-        call_statistics_queue.put(call_statistics)
-    else:
-        with open(call_statistics_filename, 'a') as call_statistics_file:
-            call_statistics_file.write(call_statistics + '\n')
-
-
-# do something useful in the following two functions
-def think():
-    pass
-
-
-def eat():
-    pass
-
-
 def left(i):
     return i
 
@@ -86,8 +58,39 @@ def put_forks(i):
         forks[right(i)].release()
 
 
+class Philosopher:
+
+    def __init__(self, identifier):
+        self._identifier = identifier
+
+    def dine(self, dining_time_in_sec):
+        started_at_sec = time()
+        num_thoughts = 0
+        num_meals = 0
+        while time() - started_at_sec < dining_time_in_sec:
+            self.think()
+            num_thoughts += 1
+            get_forks(self._identifier)
+            self.eat()
+            num_meals += 1
+            put_forks(self._identifier)
+        call_statistics = '%d, %d, %d' % (self._identifier, num_thoughts, num_meals)
+        if use_processes:
+            call_statistics_queue.put(call_statistics)
+        else:
+            with open(call_statistics_filename, 'a') as call_statistics_file:
+                call_statistics_file.write(call_statistics + '\n')
+
+    # do something useful in the following two functions
+    def think(self):
+        pass
+
+    def eat(self):
+        pass
+
+
 if __name__ == '__main__':
-    tasks = [Environment(target=dining_philosopher, args=[i]) for i in range(n)]
+    tasks = [Environment(target=Philosopher(i).dine, args=[lifetime_in_sec]) for i in range(n)]
     for task in tasks:
         task.start()
 
