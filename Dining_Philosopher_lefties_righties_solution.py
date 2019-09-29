@@ -53,4 +53,3 @@ def put_forks(i):
     else:
         fork[left(i)].signal()
         fork[right(i)].signal()
-        a
