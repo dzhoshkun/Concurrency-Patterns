@@ -1,8 +1,19 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 
 from dining_philosophers import Philosopher
 from dining_philosophers import LeftiesRighties
 from utils import human_readable_timestamp
+
+
+def algorithm(arg):
+    arg_ = arg.lower()
+    if arg_ == 'lefties-righties':
+        return LeftiesRighties
+    elif arg_ == 'multiplex':
+        return Multiplex
+    elif arg_ == 'tanenbaum':
+        return Tanenbaum
+    raise ArgumentTypeError('Dining philosophers algorithm %s unknown' % arg)
 
 
 if __name__ == '__main__':
@@ -10,6 +21,8 @@ if __name__ == '__main__':
     env_group = arg_parser.add_mutually_exclusive_group(required=True)
     env_group.add_argument('-p', '--processes', action='store_true', help='Run each philosopher as a different process')
     env_group.add_argument('-t', '--threads', action='store_true', help='Run each philosopher as a different thread')
+    arg_parser.add_argument('-a', '--algorithm', type=algorithm,
+                            help='Which solution algorithm to use, options are: lefties-righties, multiplex, tanenbaum')
     arg_parser.add_argument('-n', '--philosophers', type=int, required=True, help='Number of philosophers')
     arg_parser.add_argument('-l', '--lifetime', type=float, required=True, help='Each philosopher\'s lifetime in secs')
     arg_parser.add_argument('-o', '--stats-filename', type=str, required=True,
@@ -38,7 +51,7 @@ if __name__ == '__main__':
     else:
         call_stats_callback = open(call_statistics_filename, 'a').write
 
-    forks = LeftiesRighties(num_philosophers, Semaphore)
+    forks = args.algorithm(num_philosophers, Semaphore)
     tasks = [
         Environment(target=Philosopher(i, forks).dine, args=[lifetime_in_sec, call_stats_callback])
         for i in range(num_philosophers)]
