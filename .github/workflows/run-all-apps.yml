@@ -20,7 +20,7 @@ jobs:
     - name: Run dining philosophers lefties-righties solution
       run: |
         mkdir stats
-        python dining_philosophers/main.py -t -n 2 -l 3 -o stats/test
+        python dining_philosophers_demo.py -t -n 2 -l 3 -o stats/test
         [ $(ls stats/test-threads-*.csv | wc -l) = "1" ]
-        python dining_philosophers/main.py -p -n 2 -l 3 -o stats/test
+        python dining_philosophers_demo.py -p -n 2 -l 3 -o stats/test
         [ $(ls stats/test-processes-*.csv | wc -l) = "1" ]
