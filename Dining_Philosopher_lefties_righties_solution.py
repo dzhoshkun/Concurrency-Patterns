@@ -8,16 +8,24 @@
 # and last) This code is deadlock free if you can see anything else feel free to tell me.
 
 
+# use only one of the following lines for the corresponding multi-tasking execution environment:
+from threading import Thread as Environment, Semaphore
+# from multiprocessing import Process as Environment, Semaphore
+
+from time import time
+
 n = 5  # for standard Dining Philosophers problem
 forks = [Semaphore(1) for i in range(n)]
+lifetime_in_sec = 5
 
 
-def dining_philosphers():
-    while True:
+def dining_philosphers(i):
+    started_at_sec = time()
+    while time() - started_at_sec < lifetime_in_sec:
         think()
-        get_forks()
+        get_forks(i)
         eat()
-        put_forks()
+        put_forks(i)
 
 
 # do something useful in the following two functions
@@ -39,17 +47,26 @@ def right(i):
 
 def get_forks(i):
     if i % 2 == 0:
-        fork[right(i)].wait()
-        fork[left(i)].wait()
+        forks[right(i)].acquire()
+        forks[left(i)].acquire()
     else:
-        fork[left(i)].wait()
-        fork[right(i)].wait()
+        forks[left(i)].acquire()
+        forks[right(i)].acquire()
 
 
 def put_forks(i):
     if i % 2 == 0:
-        fork[right(i)].signal()
-        fork[left(i)].signal()
+        forks[right(i)].release()
+        forks[left(i)].release()
     else:
-        fork[left(i)].signal()
-        fork[right(i)].signal()
+        forks[left(i)].release()
+        forks[right(i)].release()
+
+
+if __name__ == '__main__':
+    tasks = [Environment(target=dining_philosphers, args=[i]) for i in range(n)]
+    for task in tasks:
+        task.start()
+
+    for task in tasks:
+        task.join()
