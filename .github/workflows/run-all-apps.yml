@@ -20,3 +20,4 @@ jobs:
     - name: Run dining philosophers lefties-righties solution
       run: |
         python Dining_Philosopher_lefties_righties_solution.py
+        [ $(ls call-stats-*.csv | wc -l) = "1" ]
