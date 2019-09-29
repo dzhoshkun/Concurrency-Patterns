@@ -1,6 +1,6 @@
 from argparse import ArgumentParser, ArgumentTypeError
 
-from dining_philosophers import Philosopher, Multiplex, Tanenbaum
+from dining_philosophers import Philosopher, Multiplex
 from dining_philosophers import LeftiesRighties
 from utils import human_readable_timestamp
 
@@ -11,8 +11,6 @@ def algorithm(arg):
         return LeftiesRighties
     elif arg_ == 'multiplex':
         return Multiplex
-    elif arg_ == 'tanenbaum':
-        return Tanenbaum
     raise ArgumentTypeError('Dining philosophers algorithm %s unknown' % arg)
 
 
@@ -22,7 +20,7 @@ if __name__ == '__main__':
     env_group.add_argument('-p', '--processes', action='store_true', help='Run each philosopher as a different process')
     env_group.add_argument('-t', '--threads', action='store_true', help='Run each philosopher as a different thread')
     arg_parser.add_argument('-a', '--algorithm', type=algorithm,
-                            help='Which solution algorithm to use, options are: lefties-righties, multiplex, tanenbaum')
+                            help='Which solution algorithm to use, options are: lefties-righties, multiplex')
     arg_parser.add_argument('-n', '--philosophers', type=int, required=True, help='Number of philosophers')
     arg_parser.add_argument('-l', '--lifetime', type=float, required=True, help='Each philosopher\'s lifetime in secs')
     arg_parser.add_argument('-o', '--stats-filename', type=str, required=True,
