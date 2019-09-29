@@ -22,7 +22,6 @@ else:
 
 
 n = 2  # for standard Dining Philosophers problem
-forks = [Semaphore(1) for i in range(n)]
 lifetime_in_sec = 2
 call_statistics_filename = 'call-stats-'
 if use_processes:
@@ -32,36 +31,39 @@ else:
 call_statistics_filename += human_readable_timestamp() + '.csv'
 
 
-def left(i):
-    return i
+class Forks:
 
+    def __init__(self, num_philosophers):
+        self._semaphores = [Semaphore(1) for _ in range(num_philosophers)]
 
-def right(i):
-    return (i + 1) % n
+    def left(self, identifier):
+        return identifier
 
+    def right(self, identifier):
+        return (identifier + 1) % len(self._semaphores)
 
-def get_forks(i):
-    if i % 2 == 0:
-        forks[right(i)].acquire()
-        forks[left(i)].acquire()
-    else:
-        forks[left(i)].acquire()
-        forks[right(i)].acquire()
+    def pick_up(self, identifier):
+        if identifier % 2 == 0:
+            self._semaphores[self.right(identifier)].acquire()
+            self._semaphores[self.left(identifier)].acquire()
+        else:
+            self._semaphores[self.left(identifier)].acquire()
+            self._semaphores[self.right(identifier)].acquire()
 
-
-def put_forks(i):
-    if i % 2 == 0:
-        forks[right(i)].release()
-        forks[left(i)].release()
-    else:
-        forks[left(i)].release()
-        forks[right(i)].release()
+    def put_down(self, identifier):
+        if identifier % 2 == 0:
+            self._semaphores[self.right(identifier)].release()
+            self._semaphores[self.left(identifier)].release()
+        else:
+            self._semaphores[self.left(identifier)].release()
+            self._semaphores[self.right(identifier)].release()
 
 
 class Philosopher:
 
-    def __init__(self, identifier):
+    def __init__(self, identifier, forks):
         self._identifier = identifier
+        self._forks = forks
 
     def dine(self, dining_time_in_sec, report_call_stats):
         started_at_sec = time()
@@ -70,10 +72,10 @@ class Philosopher:
         while time() - started_at_sec < dining_time_in_sec:
             self.think()
             num_thoughts += 1
-            get_forks(self._identifier)
+            self._forks.pick_up(self._identifier)
             self.eat()
             num_meals += 1
-            put_forks(self._identifier)
+            self._forks.put_down(self._identifier)
         call_stats = '%d, %d, %d\n' % (self._identifier, num_thoughts, num_meals)
         report_call_stats(call_stats)
 
@@ -90,7 +92,11 @@ if __name__ == '__main__':
         call_stats_callback = call_statistics_queue.put
     else:
         call_stats_callback = open(call_statistics_filename, 'a').write
-    tasks = [Environment(target=Philosopher(i).dine, args=[lifetime_in_sec, call_stats_callback]) for i in range(n)]
+
+    forks = Forks(n)
+    tasks = [
+        Environment(target=Philosopher(i, forks).dine, args=[lifetime_in_sec, call_stats_callback])
+        for i in range(n)]
     for task in tasks:
         task.start()
 
