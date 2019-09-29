@@ -63,7 +63,7 @@ class Philosopher:
     def __init__(self, identifier):
         self._identifier = identifier
 
-    def dine(self, dining_time_in_sec):
+    def dine(self, dining_time_in_sec, report_call_stats):
         started_at_sec = time()
         num_thoughts = 0
         num_meals = 0
@@ -74,12 +74,8 @@ class Philosopher:
             self.eat()
             num_meals += 1
             put_forks(self._identifier)
-        call_statistics = '%d, %d, %d' % (self._identifier, num_thoughts, num_meals)
-        if use_processes:
-            call_statistics_queue.put(call_statistics)
-        else:
-            with open(call_statistics_filename, 'a') as call_statistics_file:
-                call_statistics_file.write(call_statistics + '\n')
+        call_stats = '%d, %d, %d\n' % (self._identifier, num_thoughts, num_meals)
+        report_call_stats(call_stats)
 
     # do something useful in the following two functions
     def think(self):
@@ -90,7 +86,11 @@ class Philosopher:
 
 
 if __name__ == '__main__':
-    tasks = [Environment(target=Philosopher(i).dine, args=[lifetime_in_sec]) for i in range(n)]
+    if use_processes:
+        call_stats_callback = call_statistics_queue.put
+    else:
+        call_stats_callback = open(call_statistics_filename, 'a').write
+    tasks = [Environment(target=Philosopher(i).dine, args=[lifetime_in_sec, call_stats_callback]) for i in range(n)]
     for task in tasks:
         task.start()
 
@@ -100,4 +100,4 @@ if __name__ == '__main__':
     if use_processes:
         with open(call_statistics_filename, 'w') as call_statistics_file:
             while not call_statistics_queue.empty():
-                call_statistics_file.write(call_statistics_queue.get() + '\n')
+                call_statistics_file.write(call_statistics_queue.get())
