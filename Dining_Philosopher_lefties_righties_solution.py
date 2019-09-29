@@ -8,7 +8,9 @@
 # and last) This code is deadlock free if you can see anything else feel free to tell me.
 
 
-from time import time, strftime
+from time import time
+
+from utils import human_readable_timestamp
 
 use_processes = False
 
@@ -19,10 +21,6 @@ else:
     from threading import Thread as Environment, Semaphore
 
 
-def human_readable_timestamp_string():
-    return strftime('%Y-%m-%d-%H-%M-%S')
-
-
 n = 5  # for standard Dining Philosophers problem
 forks = [Semaphore(1) for i in range(n)]
 lifetime_in_sec = 5
@@ -31,7 +29,7 @@ if use_processes:
     call_statistics_filename += 'processes-'
 else:
     call_statistics_filename += 'threads-'
-call_statistics_filename += human_readable_timestamp_string() + '.csv'
+call_statistics_filename += human_readable_timestamp() + '.csv'
 
 
 def dining_philosopher(i):
