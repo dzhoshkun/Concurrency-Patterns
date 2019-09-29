@@ -8,9 +8,9 @@ from utils import human_readable_timestamp
 def algorithm(arg):
     arg_ = arg.lower()
     if arg_ == 'lefties-righties':
-        return LeftiesRighties
+        return LeftiesRighties, arg
     elif arg_ == 'multiplex':
-        return Multiplex
+        return Multiplex, arg
     raise ArgumentTypeError('Dining philosophers algorithm %s unknown' % arg)
 
 
@@ -43,13 +43,14 @@ if __name__ == '__main__':
         call_statistics_filename += 'processes-'
     else:
         call_statistics_filename += 'threads-'
+    call_statistics_filename += args.algorithm[1] + '-'
     call_statistics_filename += human_readable_timestamp() + '.csv'
     if use_processes:
         call_stats_callback = call_statistics_queue.put
     else:
         call_stats_callback = open(call_statistics_filename, 'a').write
 
-    forks = args.algorithm(num_philosophers, Semaphore)
+    forks = args.algorithm[0](num_philosophers, Semaphore)
     tasks = [
         Environment(target=Philosopher(i, forks).dine, args=[lifetime_in_sec, call_stats_callback])
         for i in range(num_philosophers)]
