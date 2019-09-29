@@ -7,9 +7,8 @@
 # number of philosophers but is slightly unfair when the number is odd where to righties sit next to each other (1st
 # and last) This code is deadlock free if you can see anything else feel free to tell me.
 
-
-from time import time
-
+from dining_philosophers import Forks
+from dining_philosophers import Philosopher
 from utils import human_readable_timestamp
 
 use_processes = False
@@ -31,69 +30,13 @@ else:
 call_statistics_filename += human_readable_timestamp() + '.csv'
 
 
-class Forks:
-
-    def __init__(self, num_philosophers):
-        self._semaphores = [Semaphore(1) for _ in range(num_philosophers)]
-
-    def left(self, identifier):
-        return identifier
-
-    def right(self, identifier):
-        return (identifier + 1) % len(self._semaphores)
-
-    def pick_up(self, identifier):
-        if identifier % 2 == 0:
-            self._semaphores[self.right(identifier)].acquire()
-            self._semaphores[self.left(identifier)].acquire()
-        else:
-            self._semaphores[self.left(identifier)].acquire()
-            self._semaphores[self.right(identifier)].acquire()
-
-    def put_down(self, identifier):
-        if identifier % 2 == 0:
-            self._semaphores[self.right(identifier)].release()
-            self._semaphores[self.left(identifier)].release()
-        else:
-            self._semaphores[self.left(identifier)].release()
-            self._semaphores[self.right(identifier)].release()
-
-
-class Philosopher:
-
-    def __init__(self, identifier, forks):
-        self._identifier = identifier
-        self._forks = forks
-
-    def dine(self, dining_time_in_sec, report_call_stats):
-        started_at_sec = time()
-        num_thoughts = 0
-        num_meals = 0
-        while time() - started_at_sec < dining_time_in_sec:
-            self.think()
-            num_thoughts += 1
-            self._forks.pick_up(self._identifier)
-            self.eat()
-            num_meals += 1
-            self._forks.put_down(self._identifier)
-        call_stats = '%d, %d, %d\n' % (self._identifier, num_thoughts, num_meals)
-        report_call_stats(call_stats)
-
-    # do something useful in the following two functions
-    def think(self):
-        pass
-
-    def eat(self):
-        pass
-
-
 if __name__ == '__main__':
     if use_processes:
         call_stats_callback = call_statistics_queue.put
     else:
         call_stats_callback = open(call_statistics_filename, 'a').write
 
-    forks = Forks(n)
+    forks = Forks(n, Semaphore)
     tasks = [
         Environment(target=Philosopher(i, forks).dine, args=[lifetime_in_sec, call_stats_callback])
         for i in range(n)]
