@@ -26,7 +26,12 @@ def human_readable_timestamp_string():
 n = 5  # for standard Dining Philosophers problem
 forks = [Semaphore(1) for i in range(n)]
 lifetime_in_sec = 5
-call_statistics_filename = human_readable_timestamp_string() + '.csv'
+call_statistics_filename = 'call-stats-'
+if use_processes:
+    call_statistics_filename += 'processes-'
+else:
+    call_statistics_filename += 'threads-'
+call_statistics_filename += human_readable_timestamp_string() + '.csv'
 
 
 def dining_philosopher(i):
