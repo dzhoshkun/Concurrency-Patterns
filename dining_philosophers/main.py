@@ -1,27 +1,38 @@
+from argparse import ArgumentParser
+
 from dining_philosophers import Philosopher
 from dining_philosophers import LeftiesRighties
 from utils import human_readable_timestamp
 
 
 if __name__ == '__main__':
+    arg_parser = ArgumentParser()
+    env_group = arg_parser.add_mutually_exclusive_group(required=True)
+    env_group.add_argument('-p', '--processes', action='store_true', help='Run each philosopher as a different process')
+    env_group.add_argument('-t', '--threads', action='store_true', help='Run each philosopher as a different thread')
+    arg_parser.add_argument('-n', '--philosophers', type=int, required=True, help='Number of philosophers')
+    arg_parser.add_argument('-l', '--lifetime', type=float, required=True, help='Each philosopher\'s lifetime in secs')
+    arg_parser.add_argument('-o', '--stats-filename', type=str, required=True,
+                            help='Output filename prefix (human-readable timestamp appended) for saving call stats'
+                                 ' in CSV format')
+    args = arg_parser.parse_args()
 
-    use_processes = False
-
+    use_processes = args.processes
     if use_processes:
         from multiprocessing import Process as Environment, Semaphore, Queue
         call_statistics_queue = Queue()
     else:
         from threading import Thread as Environment, Semaphore
 
-    num_philosophers = 2
-    lifetime_in_sec = 2
-    call_statistics_filename = 'call-stats-'
+    num_philosophers = args.philosophers
+    lifetime_in_sec = args.lifetime
+
+    call_statistics_filename = args.stats_filename + '-'
     if use_processes:
         call_statistics_filename += 'processes-'
     else:
         call_statistics_filename += 'threads-'
     call_statistics_filename += human_readable_timestamp() + '.csv'
-
     if use_processes:
         call_stats_callback = call_statistics_queue.put
     else:
@@ -33,7 +44,6 @@ if __name__ == '__main__':
         for i in range(num_philosophers)]
     for task in tasks:
         task.start()
-
     for task in tasks:
         task.join()
 
