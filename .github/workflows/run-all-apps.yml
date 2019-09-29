@@ -21,7 +21,11 @@ jobs:
       run: |
         stats_dir=stats-${{ matrix.python-version }}
         mkdir $stats_dir
-        python dining_philosophers_demo.py -t -a lefties-righties -n 2 -l 3 -o $stats_dir/test
-        [ $(ls $stats_dir/test-threads-*.csv | wc -l) = "1" ]
-        python dining_philosophers_demo.py -p -a lefties-righties -n 2 -l 3 -o $stats_dir/test
-        [ $(ls $stats_dir/test-processes-*.csv | wc -l) = "1" ]
+        python dining_philosophers_demo.py -t -a lefties-righties -n 2 -l 3 -o $stats_dir/test-lr
+        [ $(ls $stats_dir/test-lr-threads-*.csv | wc -l) = "1" ]
+        python dining_philosophers_demo.py -p -a lefties-righties -n 2 -l 3 -o $stats_dir/test-lr
+        [ $(ls $stats_dir/test-lr-processes-*.csv | wc -l) = "1" ]
+        python dining_philosophers_demo.py -t -a multiplex -n 2 -l 3 -o $stats_dir/test-mx
+        [ $(ls $stats_dir/test-mx-threads-*.csv | wc -l) = "1" ]
+        python dining_philosophers_demo.py -p -a multiplex -n 2 -l 3 -o $stats_dir/test-mx
+        [ $(ls $stats_dir/test-mx-processes-*.csv | wc -l) = "1" ]

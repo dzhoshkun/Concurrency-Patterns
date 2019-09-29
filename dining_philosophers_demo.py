@@ -1,6 +1,6 @@
 from argparse import ArgumentParser, ArgumentTypeError
 
-from dining_philosophers import Philosopher
+from dining_philosophers import Philosopher, Multiplex, Tanenbaum
 from dining_philosophers import LeftiesRighties
 from utils import human_readable_timestamp
 
