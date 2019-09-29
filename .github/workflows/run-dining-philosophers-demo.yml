@@ -1,4 +1,4 @@
-name: Python package
+name: Dining philosophers problem algorithms profiling demo
 
 on: [push]
 
