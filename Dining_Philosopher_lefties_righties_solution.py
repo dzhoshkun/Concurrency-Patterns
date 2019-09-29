@@ -21,9 +21,9 @@ else:
     from threading import Thread as Environment, Semaphore
 
 
-n = 5  # for standard Dining Philosophers problem
+n = 2  # for standard Dining Philosophers problem
 forks = [Semaphore(1) for i in range(n)]
-lifetime_in_sec = 5
+lifetime_in_sec = 2
 call_statistics_filename = 'call-stats-'
 if use_processes:
     call_statistics_filename += 'processes-'
