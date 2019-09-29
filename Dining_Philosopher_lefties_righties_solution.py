@@ -11,35 +11,35 @@ from dining_philosophers import Forks
 from dining_philosophers import Philosopher
 from utils import human_readable_timestamp
 
-use_processes = False
-
-if use_processes:
-    from multiprocessing import Process as Environment, Semaphore, Queue
-    call_statistics_queue = Queue()
-else:
-    from threading import Thread as Environment, Semaphore
-
-
-n = 2  # for standard Dining Philosophers problem
-lifetime_in_sec = 2
-call_statistics_filename = 'call-stats-'
-if use_processes:
-    call_statistics_filename += 'processes-'
-else:
-    call_statistics_filename += 'threads-'
-call_statistics_filename += human_readable_timestamp() + '.csv'
-
 
 if __name__ == '__main__':
+
+    use_processes = False
+
+    if use_processes:
+        from multiprocessing import Process as Environment, Semaphore, Queue
+        call_statistics_queue = Queue()
+    else:
+        from threading import Thread as Environment, Semaphore
+
+    num_philosophers = 2
+    lifetime_in_sec = 2
+    call_statistics_filename = 'call-stats-'
+    if use_processes:
+        call_statistics_filename += 'processes-'
+    else:
+        call_statistics_filename += 'threads-'
+    call_statistics_filename += human_readable_timestamp() + '.csv'
+
     if use_processes:
         call_stats_callback = call_statistics_queue.put
     else:
         call_stats_callback = open(call_statistics_filename, 'a').write
 
-    forks = Forks(n, Semaphore)
+    forks = Forks(num_philosophers, Semaphore)
     tasks = [
         Environment(target=Philosopher(i, forks).dine, args=[lifetime_in_sec, call_stats_callback])
-        for i in range(n)]
+        for i in range(num_philosophers)]
     for task in tasks:
         task.start()
 
