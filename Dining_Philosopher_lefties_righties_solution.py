@@ -8,15 +8,25 @@
 # and last) This code is deadlock free if you can see anything else feel free to tell me.
 
 
-# use only one of the following lines for the corresponding multi-tasking execution environment:
-from threading import Thread as Environment, Semaphore
-# from multiprocessing import Process as Environment, Semaphore
+from time import time, strftime
 
-from time import time
+use_processes = False
+
+if use_processes:
+    from multiprocessing import Process as Environment, Semaphore, Queue
+    call_statistics_queue = Queue()
+else:
+    from threading import Thread as Environment, Semaphore
+
+
+def human_readable_timestamp_string():
+    return strftime('%Y-%m-%d-%H-%M-%S')
+
 
 n = 5  # for standard Dining Philosophers problem
 forks = [Semaphore(1) for i in range(n)]
 lifetime_in_sec = 5
+call_statistics_filename = human_readable_timestamp_string() + '.csv'
 
 
 def dining_philosopher(i):
@@ -30,7 +40,12 @@ def dining_philosopher(i):
         eat()
         num_meals += 1
         put_forks(i)
-    print('%d thought %d times and ate %d times' % (i, num_thoughts, num_meals))
+    call_statistics = '%d, %d, %d' % (i, num_thoughts, num_meals)
+    if use_processes:
+        call_statistics_queue.put(call_statistics)
+    else:
+        with open(call_statistics_filename, 'a') as call_statistics_file:
+            call_statistics_file.write(call_statistics + '\n')
 
 
 # do something useful in the following two functions
@@ -75,3 +90,8 @@ if __name__ == '__main__':
 
     for task in tasks:
         task.join()
+
+    if use_processes:
+        with open(call_statistics_filename, 'w') as call_statistics_file:
+            while not call_statistics_queue.empty():
+                call_statistics_file.write(call_statistics_queue.get() + '\n')
