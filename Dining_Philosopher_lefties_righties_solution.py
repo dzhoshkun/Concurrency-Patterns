@@ -21,11 +21,16 @@ lifetime_in_sec = 5
 
 def dining_philosopher(i):
     started_at_sec = time()
+    num_thoughts = 0
+    num_meals = 0
     while time() - started_at_sec < lifetime_in_sec:
         think()
+        num_thoughts += 1
         get_forks(i)
         eat()
+        num_meals += 1
         put_forks(i)
+    print('%d thought %d times and ate %d times' % (i, num_thoughts, num_meals))
 
 
 # do something useful in the following two functions
