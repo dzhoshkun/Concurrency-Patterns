@@ -20,6 +20,7 @@ jobs:
     - name: Run dining philosophers lefties-righties solution
       run: |
         stats_dir=stats-${{ matrix.python-version }}
+        mkdir $stats_dir
         python dining_philosophers_demo.py -t -n 2 -l 3 -o $stats_dir/test
         [ $(ls $stats_dir/test-threads-*.csv | wc -l) = "1" ]
         python dining_philosophers_demo.py -p -n 2 -l 3 -o $stats_dir/test
