@@ -1,4 +1,7 @@
-class Forks:
+from abc import ABC, abstractmethod
+
+
+class Forks(ABC):
 
     def __init__(self, num_philosophers, semaphore_type):
         self._semaphores = [semaphore_type(1) for _ in range(num_philosophers)]
@@ -9,18 +12,10 @@ class Forks:
     def right(self, identifier):
         return (identifier + 1) % len(self._semaphores)
 
+    @abstractmethod
     def pick_up(self, identifier):
-        if identifier % 2 == 0:
-            self._semaphores[self.right(identifier)].acquire()
-            self._semaphores[self.left(identifier)].acquire()
-        else:
-            self._semaphores[self.left(identifier)].acquire()
-            self._semaphores[self.right(identifier)].acquire()
+        raise NotImplementedError
 
+    @abstractmethod
     def put_down(self, identifier):
-        if identifier % 2 == 0:
-            self._semaphores[self.right(identifier)].release()
-            self._semaphores[self.left(identifier)].release()
-        else:
-            self._semaphores[self.left(identifier)].release()
-            self._semaphores[self.right(identifier)].release()
+        raise NotImplementedError
