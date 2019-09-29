@@ -19,7 +19,7 @@ forks = [Semaphore(1) for i in range(n)]
 lifetime_in_sec = 5
 
 
-def dining_philosphers(i):
+def dining_philosopher(i):
     started_at_sec = time()
     while time() - started_at_sec < lifetime_in_sec:
         think()
@@ -64,7 +64,7 @@ def put_forks(i):
 
 
 if __name__ == '__main__':
-    tasks = [Environment(target=dining_philosphers, args=[i]) for i in range(n)]
+    tasks = [Environment(target=dining_philosopher, args=[i]) for i in range(n)]
     for task in tasks:
         task.start()
 
