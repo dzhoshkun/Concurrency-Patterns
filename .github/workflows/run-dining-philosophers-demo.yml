@@ -1,0 +1,31 @@
+name: Dining philosophers problem algorithms profiling demo
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.5, 3.6, 3.7]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Run dining philosophers lefties-righties solution
+      run: |
+        stats_dir=stats-${{ matrix.python-version }}
+        mkdir $stats_dir
+        python dining_philosophers_demo.py -t -a lefties-righties -n 2 -l 3 -o $stats_dir/test-lr
+        [ $(ls $stats_dir/test-lr-threads-lefties-righties-*.csv | wc -l) = "1" ]
+        python dining_philosophers_demo.py -p -a lefties-righties -n 2 -l 3 -o $stats_dir/test-lr
+        [ $(ls $stats_dir/test-lr-processes-lefties-righties-*.csv | wc -l) = "1" ]
+        python dining_philosophers_demo.py -t -a multiplex -n 2 -l 3 -o $stats_dir/test-mx
+        [ $(ls $stats_dir/test-mx-threads-multiplex-*.csv | wc -l) = "1" ]
+        python dining_philosophers_demo.py -p -a multiplex -n 2 -l 3 -o $stats_dir/test-mx
+        [ $(ls $stats_dir/test-mx-processes-multiplex-*.csv | wc -l) = "1" ]
